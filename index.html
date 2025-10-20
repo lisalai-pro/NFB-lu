@@ -375,6 +375,39 @@
             </div>
         </div>
         
+        <!-- FRAIS STRIPE -->
+        <div class="section">
+            <h2 class="section-title">💳 Frais de Paiement Stripe (Cartes Européennes)</h2>
+            <div class="alert">
+                <div class="alert-title">📌 Tarification Stripe Europe</div>
+                Carte européenne : <strong>1,5% + 0,25€</strong> par transaction<br>
+                Les frais sont calculés automatiquement sur chaque vente.
+            </div>
+            
+            <div class="summary-cards">
+                <div class="card">
+                    <div class="card-title">Frais Pack AUTONOME</div>
+                    <div class="card-value cost" id="stripe_autonome">€46.50</div>
+                    <div class="card-subtitle">Par transaction</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Frais Pack GUIDÉ</div>
+                    <div class="card-value cost" id="stripe_guide">€69.25</div>
+                    <div class="card-subtitle">Par transaction</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Total Frais Stripe/Mois</div>
+                    <div class="card-value cost" id="stripe_total_monthly">€486</div>
+                    <div class="card-subtitle">Basé sur ventes mensuelles</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">% Frais/Revenu</div>
+                    <div class="card-value" id="stripe_percent">1.7%</div>
+                    <div class="card-subtitle">Impact sur chiffre d'affaires</div>
+                </div>
+            </div>
+        </div>
+
         <!-- ANALYSE ROI -->
         <div class="section">
             <h2 class="section-title">💡 Analyse ROI & Break-Even</h2>
@@ -391,9 +424,14 @@
             
             <div class="summary-cards">
                 <div class="card">
+                    <div class="card-title">Marge Brute/Mois</div>
+                    <div class="card-value profit" id="gross_margin">€16,056</div>
+                    <div class="card-subtitle">Avant frais Stripe & fixes</div>
+                </div>
+                <div class="card">
                     <div class="card-title">Marge Nette/Mois</div>
-                    <div class="card-value profit" id="net_margin">€16,155</div>
-                    <div class="card-subtitle">Après frais fixes</div>
+                    <div class="card-value profit" id="net_margin">€15,256</div>
+                    <div class="card-subtitle">Après tous les frais</div>
                 </div>
                 <div class="card">
                     <div class="card-title">Break-Even</div>
@@ -434,6 +472,10 @@
             const initial_inv = parseFloat(document.getElementById('initial_investment').value);
             const monthly_fixed = parseFloat(document.getElementById('monthly_fixed').value);
             
+            // Stripe fees: 1.5% + 0.25€ per transaction (European cards)
+            const STRIPE_RATE = 0.015;
+            const STRIPE_FIXED = 0.25;
+            
             // Calculate EUR prices
             const bundle_eur = bundle_msrp * exchange;
             
@@ -443,6 +485,13 @@
             
             // Reseller price
             const bundle_reseller = bundle_eur * (1 - discount / 100);
+            
+            // Stripe fees per transaction
+            const stripe_fee_autonome = (price_autonome * STRIPE_RATE) + STRIPE_FIXED;
+            const stripe_fee_guide = (price_guide * STRIPE_RATE) + STRIPE_FIXED;
+            
+            // Total Stripe fees
+            const stripe_total_monthly = (stripe_fee_autonome * sales_autonome) + (stripe_fee_guide * sales_guide);
             
             // Margins
             const margin_autonome = price_autonome - bundle_reseller;
@@ -457,8 +506,12 @@
             const total_margin = total_revenue - total_cost;
             const margin_percent = (total_margin / total_revenue * 100);
             
-            // ROI
-            const net_margin = total_margin - monthly_fixed;
+            // Stripe percentage
+            const stripe_percent = (stripe_total_monthly / total_revenue * 100);
+            
+            // ROI with Stripe fees
+            const gross_margin = total_margin;
+            const net_margin = total_margin - stripe_total_monthly - monthly_fixed;
             const breakeven = initial_inv / net_margin;
             const annual_roi = ((net_margin * 12) / initial_inv) * 100;
             
@@ -470,6 +523,14 @@
             document.getElementById('total_margin').textContent = '€' + total_margin.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             document.getElementById('margin_percent').textContent = margin_percent.toFixed(1) + '%';
             
+            // Update Stripe cards
+            document.getElementById('stripe_autonome').textContent = '€' + stripe_fee_autonome.toFixed(2);
+            document.getElementById('stripe_guide').textContent = '€' + stripe_fee_guide.toFixed(2);
+            document.getElementById('stripe_total_monthly').textContent = '€' + stripe_total_monthly.toFixed(0);
+            document.getElementById('stripe_percent').textContent = stripe_percent.toFixed(1) + '%';
+            
+            // Update ROI cards
+            document.getElementById('gross_margin').textContent = '€' + gross_margin.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             document.getElementById('net_margin').textContent = '€' + net_margin.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             document.getElementById('breakeven').textContent = breakeven.toFixed(1) + ' mois';
             document.getElementById('annual_roi').textContent = annual_roi.toFixed(0) + '%';
