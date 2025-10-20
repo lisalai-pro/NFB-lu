@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur Tarification PBM - Neurofeedback Luxembourg</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #074d79 0%, #7E3E68 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #074d79;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+        
+        .section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            color: #074d79;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #074d79;
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 0.9em;
+        }
+        
+        input, select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #074d79;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #074d79 0%, #7E3E68 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .profit {
+            color: #10b981;
+            font-weight: 700;
+        }
+        
+        .cost {
+            color: #ef4444;
+        }
+        
+        .price {
+            color: #074d79;
+            font-weight: 600;
+        }
+        
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .card-title {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #074d79;
+        }
+        
+        .card-subtitle {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #074d79 0%, #7E3E68 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .discount-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .alert {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .alert-title {
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Simulateur Tarification PBM</h1>
+        <p class="subtitle">Neurofeedback Luxembourg - Analyse Marges & Rentabilité</p>
+        
+        <!-- SECTION 1: PRIX VIELIGHT -->
+        <div class="section">
+            <h2 class="section-title">📦 Prix Devices Vielight (USD → EUR)</h2>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Neuro Duo 4 - MSRP (USD)</label>
+                    <input type="number" id="duo4_msrp" value="2399" step="1">
+                </div>
+                <div class="input-group">
+                    <label>Vagus - MSRP (USD)</label>
+                    <input type="number" id="vagus_msrp" value="699" step="1">
+                </div>
+                <div class="input-group">
+                    <label>Bundle Duo 4 + Vagus - MSRP (USD)</label>
+                    <input type="number" id="bundle_msrp" value="3098" step="1">
+                </div>
+                <div class="input-group">
+                    <label>Taux Change USD → EUR</label>
+                    <input type="number" id="exchange_rate" value="0.92" step="0.01">
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 2: DISCOUNTS RESELLER -->
+        <div class="section">
+            <h2 class="section-title">💰 Grille Discount Reseller Vielight</h2>
+            <div class="alert">
+                <div class="alert-title">✅ GRILLE OFFICIELLE VIELIGHT</div>
+                Discounts validés selon contrat reseller Neurofeedback Luxembourg.
+            </div>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Discount 1-5 devices (%)</label>
+                    <input type="number" id="discount_1_5" value="30" step="1" min="0" max="60">
+                </div>
+                <div class="input-group">
+                    <label>Discount 6-19 devices (%)</label>
+                    <input type="number" id="discount_6_19" value="45" step="1" min="0" max="60">
+                </div>
+                <div class="input-group">
+                    <label>Discount 20+ devices (%)</label>
+                    <input type="number" id="discount_20" value="50" step="1" min="0" max="60">
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 3: NOS PRIX PUBLICS -->
+        <div class="section">
+            <h2 class="section-title">🏷️ Nos Prix Publics Luxembourg (EUR)</h2>
+            
+            <div class="alert" style="background: #dbeafe; border-left-color: #3b82f6;">
+                <div class="alert-title" style="color: #1e40af;">📦 Bundle Unique: Neuro Duo 4 + Vagus</div>
+                Les deux packs incluent le set complet (Duo 4 + Vagus). Seule différence: formation & accompagnement.
+            </div>
+            
+            <h3 style="margin: 20px 0 10px 0; color: #074d79;">Pack AUTONOME - "Sans Accompagnement"</h3>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Prix Bundle Duo 4 + Vagus (client)</label>
+                    <input type="number" id="price_autonome" value="3200" step="50">
+                </div>
+                <div class="input-group">
+                    <label>Contenu</label>
+                    <input type="text" value="Device + Vidéos + Protocole PDF" disabled style="background: #f3f4f6; color: #666;">
+                </div>
+            </div>
+            
+            <h3 style="margin: 20px 0 10px 0; color: #074d79;">Pack GUIDÉ - "Avec Formation 90 min" ⭐</h3>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Prix Bundle Duo 4 + Vagus + Formation (client)</label>
+                    <input type="number" id="price_guide" value="3800" step="50">
+                </div>
+                <div class="input-group">
+                    <label>Contenu</label>
+                    <input type="text" value="Device + Formation 90min + Support prioritaire" disabled style="background: #f3f4f6; color: #666;">
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 4: SIMULATIONS MENSUELLES -->
+        <div class="section">
+            <h2 class="section-title">📊 Simulations Ventes Mensuelles</h2>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Nombre Pack AUTONOME / mois</label>
+                    <input type="number" id="sales_autonome" value="3" step="1" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Nombre Pack GUIDÉ / mois</label>
+                    <input type="number" id="sales_guide" value="5" step="1" min="0">
+                </div>
+            </div>
+            
+            <button class="button" onclick="calculate()">🔄 CALCULER MARGES</button>
+            
+            <div class="summary-cards">
+                <div class="card">
+                    <div class="card-title">Bundles à Commander</div>
+                    <div class="card-value" id="total_devices">8</div>
+                    <div class="card-subtitle">Duo 4 + Vagus sets</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Discount Applicable</div>
+                    <div class="card-value" id="applicable_discount">45%</div>
+                    <div class="card-subtitle">Selon volume</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Coût Achat Total</div>
+                    <div class="card-value cost" id="total_cost">€12,544</div>
+                    <div class="card-subtitle">Prix reseller</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Revenu Total</div>
+                    <div class="card-value price" id="total_revenue">€28,600</div>
+                    <div class="card-subtitle">Prix publics</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Marge Brute</div>
+                    <div class="card-value profit" id="total_margin">€16,056</div>
+                    <div class="card-subtitle">Profit avant frais</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Marge %</div>
+                    <div class="card-value profit" id="margin_percent">56.1%</div>
+                    <div class="card-subtitle">Rentabilité</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TABLEAU DÉTAILLÉ -->
+        <div class="section">
+            <h2 class="section-title">📋 Détail par Device</h2>
+            <div class="table-container">
+                <table id="detailTable">
+                    <thead>
+                        <tr>
+                            <th>Device</th>
+                            <th>MSRP USD</th>
+                            <th>MSRP EUR</th>
+                            <th>Discount</th>
+                            <th>Prix Reseller</th>
+                            <th>Prix Public NFB-Lux</th>
+                            <th>Marge Unitaire</th>
+                            <th>Marge %</th>
+                            <th>Qty/Mois</th>
+                            <th>Marge Totale/Mois</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detailTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- ANALYSE ROI -->
+        <div class="section">
+            <h2 class="section-title">💡 Analyse ROI & Break-Even</h2>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Investissement Initial (€)</label>
+                    <input type="number" id="initial_investment" value="5500" step="100">
+                </div>
+                <div class="input-group">
+                    <label>Frais Mensuels Fixes (€)</label>
+                    <input type="number" id="monthly_fixed" value="800" step="50">
+                </div>
+            </div>
+            
+            <div class="summary-cards">
+                <div class="card">
+                    <div class="card-title">Marge Nette/Mois</div>
+                    <div class="card-value profit" id="net_margin">€16,155</div>
+                    <div class="card-subtitle">Après frais fixes</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Break-Even</div>
+                    <div class="card-value" id="breakeven">0.3 mois</div>
+                    <div class="card-subtitle">Rentabilité investissement</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">ROI Annuel</div>
+                    <div class="card-value profit" id="annual_roi">352%</div>
+                    <div class="card-subtitle">Projection 12 mois</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function getDiscount(totalDevices) {
+            const d1 = parseFloat(document.getElementById('discount_1_5').value);
+            const d2 = parseFloat(document.getElementById('discount_6_19').value);
+            const d3 = parseFloat(document.getElementById('discount_20').value);
+            
+            if (totalDevices <= 5) return d1;
+            if (totalDevices <= 19) return d2;
+            return d3;
+        }
+        
+        function calculate() {
+            // Get inputs
+            const bundle_msrp = parseFloat(document.getElementById('bundle_msrp').value);
+            const exchange = parseFloat(document.getElementById('exchange_rate').value);
+            
+            const price_autonome = parseFloat(document.getElementById('price_autonome').value);
+            const price_guide = parseFloat(document.getElementById('price_guide').value);
+            
+            const sales_autonome = parseInt(document.getElementById('sales_autonome').value);
+            const sales_guide = parseInt(document.getElementById('sales_guide').value);
+            
+            const initial_inv = parseFloat(document.getElementById('initial_investment').value);
+            const monthly_fixed = parseFloat(document.getElementById('monthly_fixed').value);
+            
+            // Calculate EUR prices
+            const bundle_eur = bundle_msrp * exchange;
+            
+            // Total devices (tous les packs sont des bundles)
+            const total_devices = sales_autonome + sales_guide;
+            const discount = getDiscount(total_devices);
+            
+            // Reseller price
+            const bundle_reseller = bundle_eur * (1 - discount / 100);
+            
+            // Margins
+            const margin_autonome = price_autonome - bundle_reseller;
+            const margin_guide = price_guide - bundle_reseller;
+            
+            const margin_pct_autonome = (margin_autonome / price_autonome * 100);
+            const margin_pct_guide = (margin_guide / price_guide * 100);
+            
+            // Totals
+            const total_cost = bundle_reseller * total_devices;
+            const total_revenue = (price_autonome * sales_autonome) + (price_guide * sales_guide);
+            const total_margin = total_revenue - total_cost;
+            const margin_percent = (total_margin / total_revenue * 100);
+            
+            // ROI
+            const net_margin = total_margin - monthly_fixed;
+            const breakeven = initial_inv / net_margin;
+            const annual_roi = ((net_margin * 12) / initial_inv) * 100;
+            
+            // Update summary cards
+            document.getElementById('total_devices').textContent = total_devices;
+            document.getElementById('applicable_discount').textContent = discount.toFixed(0) + '%';
+            document.getElementById('total_cost').textContent = '€' + total_cost.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            document.getElementById('total_revenue').textContent = '€' + total_revenue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            document.getElementById('total_margin').textContent = '€' + total_margin.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            document.getElementById('margin_percent').textContent = margin_percent.toFixed(1) + '%';
+            
+            document.getElementById('net_margin').textContent = '€' + net_margin.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            document.getElementById('breakeven').textContent = breakeven.toFixed(1) + ' mois';
+            document.getElementById('annual_roi').textContent = annual_roi.toFixed(0) + '%';
+            
+            // Update table
+            const tbody = document.getElementById('detailTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td><strong>Bundle Duo 4 + Vagus</strong><br><small>Pack AUTONOME</small></td>
+                    <td>$${bundle_msrp}</td>
+                    <td>€${bundle_eur.toFixed(0)}</td>
+                    <td><span class="discount-badge">-${discount}%</span></td>
+                    <td class="cost">€${bundle_reseller.toFixed(0)}</td>
+                    <td class="price">€${price_autonome}</td>
+                    <td class="profit">€${margin_autonome.toFixed(0)}</td>
+                    <td class="profit">${margin_pct_autonome.toFixed(1)}%</td>
+                    <td><strong>${sales_autonome}</strong></td>
+                    <td class="profit highlight">€${(margin_autonome * sales_autonome).toFixed(0)}</td>
+                </tr>
+                <tr>
+                    <td><strong>Bundle Duo 4 + Vagus</strong><br><small>Pack GUIDÉ + Formation 90min</small></td>
+                    <td>$${bundle_msrp}</td>
+                    <td>€${bundle_eur.toFixed(0)}</td>
+                    <td><span class="discount-badge">-${discount}%</span></td>
+                    <td class="cost">€${bundle_reseller.toFixed(0)}</td>
+                    <td class="price">€${price_guide}</td>
+                    <td class="profit">€${margin_guide.toFixed(0)}</td>
+                    <td class="profit">${margin_pct_guide.toFixed(1)}%</td>
+                    <td><strong>${sales_guide}</strong></td>
+                    <td class="profit highlight">€${(margin_guide * sales_guide).toFixed(0)}</td>
+                </tr>
+            `;
+        }
+        
+        // Auto-calculate on input change
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', calculate);
+        });
+        
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>
